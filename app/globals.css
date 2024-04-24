@@ -28,3 +28,21 @@ body {
     text-wrap: balance;
   }
 }
+
+.gfg {
+  position: relative;
+  width: 100%;
+  text-align: center;
+}
+
+.text-container {
+  position: absolute;
+  color: rgb(255, 255, 255);
+  left: 50%;
+  top: 80%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 18px;
+}

@@ -14,6 +14,13 @@ export default function Chat() {
   const [length, setLength] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [isImageLoading, setImageLoading] = useState(false);
+  const [imageURL, setImageURL] = useState("");
+
+  const [model, setModel] = useState("dall-e-2");
+  const [quality, setQuality] = useState("standard");
+  const [style, setStyle] = useState("vivid");
+
   const handleTopicChnge = (e: { target: { value: SetStateAction<string>; }; }) => {
     setTopic(e.target.value);
   }
@@ -26,6 +33,7 @@ export default function Chat() {
     setLength(Number(e.target.value));
   }
 
+
   useEffect(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop =
@@ -34,7 +42,6 @@ export default function Chat() {
   }, [messages]);
 
   return (
-
     <div className="flex flex-col w-full h-screen max-w-md py-24 mx-auto stretch">
       <div className="space-x-2 items-center">
         <div className="flex flex-col items-center">
@@ -57,7 +64,6 @@ export default function Chat() {
               <option value="mindset">Mindset</option>
             </select>
           </div>
-
           <div className="flex gap-4 items-center">
             <label htmlFor="length" className="block text-sm font-medium text-gray-700">Length:</label>
             <input
@@ -87,14 +93,49 @@ export default function Chat() {
               onChange={handleTemperatureChange} />
             <span>{temperature}</span>
           </div>
+          {<select
+            id="model"
+            name="model"
+            value={model}
+            className="p-2 m-2 bg-transparent border rounded-md bg-blue-100"
+            onChange={(e) => setModel(e.target.value)}
+          >
+            <option value="dall-e-2" className="text-black">DALL-E 2</option>
+            <option value="dall-e-3" className="text-black">DALL-E 3</option>
+          </select>}
+          {model == "dall-e-3" && <select
+            id="quality"
+            name="quality"
+            value={quality}
+            className="p-2 m-2 bg-transparent border rounded-md bg-blue-100"
+            onChange={(e) => setQuality(e.target.value)}
+          >
+            <option value="standard" className="text-black">SD</option>
+            <option value="hd" className="text-black">HD</option>
+          </select>}
+
+          {/* Extra Dall-E options */}
+          {model == "dall-e-3" && <select
+            id="style"
+            name="style"
+            value={style}
+            className="p-2 m-2 bg-transparent border rounded-md bg-blue-100"
+            onChange={(e) => setStyle(e.target.value)}
+          >
+            <option value="vivid" className="text-black">Vivid</option>
+            <option value="natural" className="text-black">Natural</option>
+          </select>}
+
           <div className="flex flex-col items-center">
             <button
               className="bg-blue-500 p-2 text-white rounded shadow-xl"
-              disabled={isLoading}
+              disabled={isLoading && isImageLoading}
               onClick={async (e) => {
                 e.preventDefault();
                 try {
                   setIsLoading(true);
+                  setImageLoading(true);
+                  setQuote("");
                   const response = await fetch("api/generate", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -105,18 +146,31 @@ export default function Chat() {
                   }
                   const data = await response.json();
                   setQuote(data.quote);
+                  setImageLoading(true);
+                  const image_response = await fetch("api/image", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model, quality, style }),
+                  });
+                  const image_data = await image_response.json();
+                  setImageURL(image_data.url);
                 } finally {
                   setIsLoading(false);
+                  setImageLoading(false);
                 }
               }}
-            >Generate Quote
+            >Generate
             </button>
           </div>
         </div>
-        {
-          quote &&
-          !isLoading && <p className="mt-4 text-lg text-white-700">Quote: {quote}
-          </p>
+        {isImageLoading && <div><p>Loading...</p></div>}
+        {quote && imageURL && !isImageLoading &&
+          <div class="gfg">
+            <img src={imageURL}></img>
+            <div class="text-container">
+              <h3>{quote}</h3>
+            </div>
+          </div>
         }
       </div>
     </div>);
