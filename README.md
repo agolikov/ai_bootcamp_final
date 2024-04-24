@@ -29,7 +29,7 @@ npm install
 Create .env file in the root directory and PUT your OpenAI key and Base URL. The example of content of the file:
 
 ```bash
-OPENAI_API_KEY=sk-...<other_parts_of_key
+OPENAI_API_KEY=sk-...<other_parts_of_key>
 OPENAI_BASE_URL=https://api.openai.com/v1
 ```
 
